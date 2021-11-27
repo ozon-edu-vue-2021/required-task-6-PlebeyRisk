@@ -20,3 +20,4 @@ const truncate = (str, allowSymbolsCount, useWordBoundary = false) => {
 };
 
 export default truncate;
+
