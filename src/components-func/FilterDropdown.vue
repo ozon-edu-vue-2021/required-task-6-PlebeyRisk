@@ -1,5 +1,5 @@
 <script lang="jsx">
-import Icon from './Icon.vue';
+import Icon from './Icon';
 import defaultTypes from '../constants/defaultTypes';
 import color from '../constants/colors';
 

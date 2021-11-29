@@ -1,0 +1,8 @@
+.column {
+  text-align: left;
+  border-bottom: 1px solid var(--gray);
+  padding: 1rem 1rem;
+  overflow: hidden;
+  max-height: 100px;
+  height: 100px;
+}

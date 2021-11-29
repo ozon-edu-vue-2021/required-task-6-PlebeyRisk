@@ -2,9 +2,9 @@
 import InfiniteLoading from 'vue-infinite-loading';
 import Pagination from './Pagination.vue';
 import FilterDropdown from './FilterDropdown.vue';
-import MyTable from './MyTable.vue';
+import MyTable from './MyTable';
 import MyTableVS from './MyTableVS.vue';
-import Icon from './Icon.vue';
+import Icon from './Icon';
 import { errorHandler } from '../error';
 import api from '../utils/api';
 import isEqual from 'lodash/isEqual';
