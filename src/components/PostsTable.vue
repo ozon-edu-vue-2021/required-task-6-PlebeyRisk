@@ -221,7 +221,7 @@ export default {
     async loadPosts(page = 1, isForce = false, $infiniteState = false) {
       const filters = {
         page: page < 1 ? 1 : page,
-        limit: 'all',
+        limit: this.limit,
       };
 
       if (Object.keys(this.columnsSort)?.length) {
