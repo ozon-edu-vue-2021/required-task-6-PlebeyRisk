@@ -1,5 +1,5 @@
 <template>
-  <span :class="$style.icon">
+  <span :class="$style.icon" v-on="$listeners">
     <component
       v-if="name && name.length"
       :fill="color || 'black'"

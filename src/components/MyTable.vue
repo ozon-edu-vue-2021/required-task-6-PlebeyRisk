@@ -19,7 +19,7 @@
         </tr>
       </tbody>
     </table>
-    <slot v-if="!haveItems" name="no-more">
+    <slot v-if="!haveItems && !loading" name="no-more">
       <div :class="$style['no-more-message']">
         No results :(
       </div>
@@ -36,6 +36,7 @@ export default {
   props: {
     items: defaultTypes.array(),
     columns: defaultTypes.array(),
+    loading: defaultTypes.boolean(),
   },
   computed: {
     haveItems() {

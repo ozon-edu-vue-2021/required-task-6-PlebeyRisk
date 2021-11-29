@@ -1,130 +1,4 @@
-<template>
-  <div :class="$style['posts-table']">
-    <div :class="$style.options">
-      <div :class="$style['options-block']">
-        <div :class="$style['options-title']">Table type:</div>
-
-        <button
-          :class="[$style.btn, {[$style.active]: !isVirtualScroll}]"
-          @click="onChangeTableComponent('MyTable')"
-        >
-          Common table
-        </button>
-
-        <button
-          :class="[$style.btn, {[$style.active]: isVirtualScroll}]"
-          @click="onChangeTableComponent('MyTableVS')"
-        >
-          Virtual scroll
-        </button>
-      </div>
-
-      <div v-if="!isVirtualScroll" :class="$style['options-block']">
-        <div :class="$style['options-title']">Loading type:</div>
-
-        <button
-          :class="[$style.btn, {[$style.active]: loadingMethod === loadingMethods.pagination}]"
-          @click="onChangeLoadingMethod(loadingMethods.pagination)"
-        >
-          Pagination
-        </button>
-
-        <button
-          :class="[$style.btn, {[$style.active]: loadingMethod === loadingMethods.scroll}]"
-          @click="onChangeLoadingMethod(loadingMethods.scroll)"
-        >
-          Infinite scroll
-        </button>
-      </div>
-
-      <div :class="$style['options-block']">
-        <div :class="$style['options-title']">Limit:</div>
-        <button :class="[$style.btn, {[$style.active]: limit === 5}]" @click="onChangeLimit(5)">5</button>
-        <button :class="[$style.btn, {[$style.active]: limit === 10}]" @click="onChangeLimit(10)">10</button>
-        <button :class="[$style.btn, {[$style.active]: limit === 15}]" @click="onChangeLimit(15)">15</button>
-      </div>
-
-      <div :class="$style['options-block']">
-        <button
-          :class="[$style.btn, $style['btn-reset']]"
-          @click="onResetFiltersAndSort"
-        >
-          Reset filters, sort, limit
-        </button>
-      </div>
-    </div>
-
-    <Pagination
-      v-if="isShowPagination"
-      :class="$style.pagination"
-      :page="currentPage"
-      :totalPage="totalPage"
-      @change="onPageChange" />
-
-    <component :is="tableComponent" :items="preparedPosts" :columns="columns" :loading="isPending">
-      <template #headerItem="{ column, class: headerItemClass }">
-        <div :class="[$style['header-item'], headerItemClass]">
-          <div :class="$style['name-wrapper']">
-            <span
-              :class="$style['name']"
-              @click="onSortClick(column.id)"
-            >
-              {{column.name}}
-            </span>
-
-            <Icon
-              :class="$style.icon"
-              :name="getSortIcon(column.id).name"
-              :color="getSortIcon(column.id).color"
-              @click="onSortClick(column.id)" />
-          </div>
-
-          <div :class="$style['actions']">
-            <FilterDropdown
-              :value="columnFilters[column.id]"
-              @change="onColumnFilterChange(column.id, $event)"
-              @reset="onResetFilterByColumn(column.id)" />
-          </div>
-        </div>
-      </template>
-
-      <template v-if="isShowInfiniteLoading" #after>
-        <InfiniteLoading
-          :identifier="infiniteId"
-          @infinite="onInfiniteLoading"
-        >
-          <div slot="no-results" :class="$style['infinite-message']">
-            {{noResultsMessage}}
-          </div>
-
-          <div slot="no-more" :class="$style['infinite-message']">
-            {{noMoreMessage}}
-          </div>
-
-          <template #error="{ trigger }">
-            <div :class="$style['infinite-message']">
-              <div>Failed to load data</div>
-              <button :class="$style.button" @click="trigger">Repeat</button>
-            </div>
-          </template>
-        </InfiniteLoading>
-      </template>
-
-      <template v-if="loadingMethod === 'scroll'" #no-more>
-        <div></div>
-      </template>
-    </component>
-
-    <Pagination
-      v-if="isShowPagination"
-      :class="$style.pagination"
-      :page="currentPage"
-      :totalPage="totalPage"
-      @change="onPageChange" />
-  </div>
-</template>
-
-<script>
+<script lang="jsx">
 import InfiniteLoading from 'vue-infinite-loading';
 import Pagination from './Pagination.vue';
 import FilterDropdown from './FilterDropdown.vue';
@@ -413,7 +287,210 @@ export default {
       }
 
       this.tableComponent = componentName;
+    },
+    renderPagination() {
+      return (
+        !!this.isShowPagination &&
+          <Pagination
+            class={this.$style.pagination}
+            page={this.currentPage}
+            totalPage={this.totalPage}
+            on={{ change: this.onPageChange }} />
+      );
+    },
+    renderHeaderItem({ column, class: headerItemClass } = {}) {
+      const { $style, columnFilters } = this;
+
+      const iconOptions = this.getSortIcon(column.id);
+
+      return (
+        <div class={[$style['header-item'], headerItemClass]}>
+          <div class={$style['name-wrapper']}>
+            <span
+              class={$style['name']}
+              on={{ click: () => this.onSortClick(column.id) }}
+            >
+              {column.name}
+            </span>
+
+            <Icon
+              class={$style.icon}
+              name={iconOptions?.name}
+              color={iconOptions?.color}
+              on={{ click: () => this.onSortClick(column.id) }} />
+          </div>
+
+          <div class={$style['actions']}>
+            <FilterDropdown
+              value={columnFilters[column.id]}
+              on={{
+                change: (event) => this.onColumnFilterChange(column.id, event),
+                reset: () => this.onResetFilterByColumn(column.id),
+              }}
+            />
+          </div>
+        </div>
+      );
+    },
+    renderNoResultsMessage() {
+      return (
+        <div class={this.$style['infinite-message']}>
+          {this.noResultsMessage}
+        </div>
+      );
+    },
+    renderNoMoreMessage() {
+      return (
+        <div class={this.$style['infinite-message']}>
+          {this.noMoreMessage}
+        </div>
+      );
+    },
+    renderErrorMessage({ trigger }) {
+      return (
+        <div class={this.$style['infinite-message']}>
+          <div>Failed to load data</div>
+
+          <button
+            class={this.$style.button}
+            on={{ click: trigger }}
+          >
+            Repeat
+          </button>
+        </div>
+      );
+    },
+    renderInfiniteLoading() {
+      const { $style, isShowInfiniteLoading, infiniteId } = this;
+
+      const scopedSlots= {
+        'no-results': this.renderNoResultsMessage,
+        'no-more': this.renderNoMoreMessage,
+        'error': this.renderErrorMessage,
+      };
+
+      return isShowInfiniteLoading
+        ? (<InfiniteLoading
+          identifier={infiniteId}
+          on={{ infinite: this.onInfiniteLoading }}
+          scopedSlots={scopedSlots}
+        />)
+        : undefined;
+    },
+    renderTable() {
+      const { preparedPosts, columns, isPending } = this;
+
+      const TableComponent = this.tableComponent;
+
+      const scopedSlots = {
+        headerItem: (item) => this.renderHeaderItem(item),
+        after: this.renderInfiniteLoading,
+        'no-more': () => this.loadingMethod === 'scroll' ? (<div></div>) : undefined,
+      };
+
+      return (
+        <TableComponent
+          items={preparedPosts}
+          columns={columns}
+          loading={isPending}
+          scopedSlots={scopedSlots}
+        />
+      );
     }
+  },
+  render() {
+    const {
+      $style,
+      isVirtualScroll,
+      loadingMethods,
+      loadingMethod,
+      limit,
+    } = this;
+
+    const pagination = this.renderPagination();
+    const table = this.renderTable();
+
+    return (
+      <div class={$style['posts-table']}>
+        <div class={$style.options}>
+          <div class={$style['options-block']}>
+            <div class={$style['options-title']}>Table type:</div>
+
+            <button
+              class={[$style.btn, {[$style.active]: !isVirtualScroll}]}
+              on={{ click: () => this.onChangeTableComponent('MyTable') }}
+            >
+              Common table
+            </button>
+
+            <button
+              class={[$style.btn, {[$style.active]: isVirtualScroll}]}
+              on={{ click: () => this.onChangeTableComponent('MyTableVS') }}
+            >
+              Virtual scroll
+            </button>
+          </div>
+
+          {!isVirtualScroll &&
+            <div class={$style['options-block']}>
+              <div class={$style['options-title']}>Loading type:</div>
+
+              <button
+                class={[$style.btn, {[$style.active]: loadingMethod === loadingMethods.pagination}]}
+                on={{ click: () => this.onChangeLoadingMethod(loadingMethods.pagination) }}
+              >
+                Pagination
+              </button>
+
+              <button
+                class={[$style.btn, {[$style.active]: loadingMethod === loadingMethods.scroll}]}
+                on={{ click: () => this.onChangeLoadingMethod(loadingMethods.scroll) }}
+              >
+                Infinite scroll
+              </button>
+            </div>
+          }
+
+          <div class={$style['options-block']}>
+            <div class={$style['options-title']}>Limit:</div>
+
+            <button
+              class={[$style.btn, {[$style.active]: limit === 5}]}
+              on={{ click: () => this.onChangeLimit(5) }}
+            >
+              5
+            </button>
+
+            <button
+              class={[$style.btn, {[$style.active]: limit === 10}]}
+              on={{ click: () => this.onChangeLimit(10) }}
+            >
+              10
+            </button>
+
+            <button
+              class={[$style.btn, {[$style.active]: limit === 15}]}
+              on={{ click: () => this.onChangeLimit(15) }}
+            >
+              15
+            </button>
+          </div>
+
+          <div class={$style['options-block']}>
+            <button
+              class={[$style.btn, $style['btn-reset']]}
+              on={{ click: this.onResetFiltersAndSort }}
+            >
+              Reset filters, sort, limit
+            </button>
+          </div>
+        </div>
+
+        {pagination}
+        {table}
+        {pagination}
+      </div>
+    );
   }
 };
 </script>
