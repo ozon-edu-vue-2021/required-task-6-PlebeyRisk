@@ -1,0 +1,15 @@
+.table {
+  width: 100%;
+  table-layout: fixed;
+  border-collapse: collapse;
+}
+.header-item {
+  background: var(--gray);
+  overflow: hidden;
+}
+.no-more-message {
+  display: flex;
+  text-align: center;
+  justify-content: center;
+  padding: 15px;
+}
